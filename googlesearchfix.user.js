@@ -8,6 +8,7 @@
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
+// @downloadURL  https://github.com/WTPerv/Google-Search-Fix/raw/refs/heads/main/googlesearchfix.user.js
 // ==/UserScript==
 
 (function () {
