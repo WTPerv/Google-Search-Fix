@@ -15,3 +15,22 @@ When you click on the search button or press enter, it transforms your search in
     * [TamperMonkey](https://www.tampermonkey.net/) (Ewww closed source)
 2. Click this link:
     * [Install Google Search Fix](https://github.com/WTPerv/Google-Search-Fix/raw/refs/heads/main/googlesearchfix.user.js)
+
+## Examples
+### Making every term relevant
+
+This:
+<img width="1068" height="317" alt="firefox_LSFG0UTfzO" src="https://github.com/user-attachments/assets/b09c7659-0f1e-4c06-b3f6-28539070a290" />
+
+Becomes this:
+<img width="1427" height="425" alt="firefox_XGlPx11FcK" src="https://github.com/user-attachments/assets/9ff06dce-c467-47af-a890-60cd63732daf" />
+
+*(Yes I know the exact phrase wasn't found, but I have full confidence that every result has each and every word included in any other order)*
+
+*(If you actually want the exact phrase, you'd search something like "why cant I hold all these lemmings")*
+
+*(More info [here](https://ahrefs.com/blog/google-advanced-search-operators/))*
+
+### Blacklist
+A simple blacklist menu lets you add, remove, enable and disable terms you don't want to find in your results
+<img width="1720" height="529" alt="firefox_CXpjAv5L0a" src="https://github.com/user-attachments/assets/fb3619ee-72b0-4f3e-af8c-5dde05d753af" />
