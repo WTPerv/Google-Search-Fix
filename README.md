@@ -10,7 +10,7 @@ When you click on the search button or press enter, it transforms your search in
 
 ## How to install?
 1. Get a GM Extension:
-    * [GreaseMonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) (Firefox Only)
+    * [GreaseMonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) (Firefox only)
     * [ViolentMonkey](https://violentmonkey.github.io/get-it/) (Everything else)
     * [TamperMonkey](https://www.tampermonkey.net/) (Ewww closed source)
 2. Click this link:
@@ -27,7 +27,7 @@ Becomes this:
 
 *(Yes I know the exact phrase wasn't found, but I have full confidence that every result has each and every word included in any other order)*
 
-*(If you actually want the exact phrase, you'd search something like "why cant I hold all these lemmings")*
+*(If you actually want the exact phrase, you'd surround the whole phrase with parentheses like "why cant I hold all these lemmings")*
 
 *(More info [here](https://ahrefs.com/blog/google-advanced-search-operators/))*
 
