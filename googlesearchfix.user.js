@@ -199,7 +199,6 @@
         closeBtnStyle();
         closeBtn.onclick = () => menu.remove();
 
-
         const addContainer = document.createElement("div");
         addContainer.id = "gsf_bl_add";
         addContainerStyle();
@@ -211,7 +210,8 @@
 
         const addBtn = document.createElement("button");
         addBtn.id = "gsf_bl_add_btn";
-        addBtnStyle();
+        addBtn.textContent = "+";
+        btnStyle(addBtn);
 
         addInput.addEventListener("keydown", e => {
             if (e.key === "Enter") {
@@ -234,6 +234,32 @@
             addInput.focus();
         };
 
+        const allEnableBtn = document.createElement("button");
+        allEnableBtn.id = "gsf_bl_extra_allE";
+        allEnableBtn.textContent = "Enable All";
+        btnStyle(allEnableBtn);
+
+        allEnableBtn.onclick = () => {
+            const list = getBlacklist();
+
+            list.forEach(item => { item.enabled = true; });
+            saveBlacklist(list);
+            render();
+        }
+
+        const allDisableBtn = document.createElement("button");
+        allDisableBtn.id = "gsf_bl_extra_allD";
+        allDisableBtn.textContent = "Disable All";
+        btnStyle(allDisableBtn);
+
+        allDisableBtn.onclick = () => {
+            const list = getBlacklist();
+
+            list.forEach(item => { item.enabled = false; });
+            saveBlacklist(list);
+            render();
+        }
+
         const listContainer = document.createElement("div");
         listContainer.id = "gsf_bl_list";
         listContainerStyle();
@@ -249,6 +275,8 @@
             header.appendChild(closeBtn);
             addContainer.appendChild(addInput);
             addContainer.appendChild(addBtn);
+            addContainer.appendChild(allEnableBtn);
+            addContainer.appendChild(allDisableBtn);
             menu.appendChild(header);
             menu.appendChild(addContainer);
             menu.appendChild(listContainer);
@@ -335,7 +363,8 @@
             menu.style.display = "none";
             menu.style.flexDirection = "column";
             menu.style.overflow = "hidden";
-            menu.style.resize = "none";
+            menu.style.resize = "both";
+            menu.style.padding = "6px";
         }
 
         function headerStyle() {
@@ -366,17 +395,19 @@
             addInput.style.background = "#4d5156";
             addInput.style.border = "none";
             addInput.style.color = "white";
-            addInput.style.padding = "6px";
+            addInput.style.padding = "6px 12px";
+            addInput.style.borderRadius = "20px";
         }
 
-        function addBtnStyle() {
-            addBtn.textContent = "+";
-            addBtn.style.cursor = "pointer";
-            addBtn.style.padding = "0 12px";
-            addBtn.style.border = "solid";
-            addBtn.style.borderColor = "white";
-            addBtn.style.borderWidth = "1px";
-            addBtn.style.borderRadius = "20px";
+        function btnStyle(btn) {
+            btn.style.cursor = "pointer";
+            btn.style.padding = "0 12px";
+            btn.style.border = "solid";
+            btn.style.borderColor = "white";
+            btn.style.borderWidth = "1px";
+            btn.style.borderRadius = "20px";
+            btn.style.background = "transparent";
+            btn.style.color = "white";
         }
 
         function listContainerStyle() {
@@ -387,6 +418,7 @@
             listContainer.style.overflowY = "auto";
             listContainer.style.padding = "10px";
             listContainer.style.maxHeight = "50vh";
+            listContainer.style.alignContent = "flex-start";
         }
 
         function chipStyle(chip, item) {
@@ -398,8 +430,9 @@
             chip.style.fontSize = "13px";
             chip.style.cursor = "pointer";
             chip.style.userSelect = "none";
-            chip.style.background = item.enabled ? "#5f6368" : "#3c4043";
+            chip.style.background = item.enabled ? "#5f6368" : "#282a2c";
             chip.style.color = "white";
+            chip.style.height = "20px";
         }
 
         function chipDelStyle(chipDel) {
