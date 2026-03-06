@@ -435,21 +435,24 @@
             const content = isNegated ? p.slice(1) : p;
 
             const isOperator = googleResStarts.some(s => content.startsWith(s));
-
-            if (isOperator) {
+            if (isOperator)
                 return p;
-            }
 
-            if (isNegated) {
+            if (isNegated)
                 return content.startsWith('"') ? p : `-"${content}"`;
-            }
 
             return p.startsWith('"') ? p : `"${p}"`;
         }).join(" ");
 
         const blacklist = getBlacklist()
-            .filter(i => i.enabled)
-            .map(i => `-"${i.term}"`)
+            .filter(b => b.enabled)
+            .map(b => {
+                const isOperator = googleResStarts.some(s => b.term.startsWith(s));
+                if (isOperator)
+                    return `-${b.term}`;
+
+                return `-"${b.term}"`;
+            })
             .join(" ");
 
         return quoted + (blacklist ? " " + blacklist : "");
