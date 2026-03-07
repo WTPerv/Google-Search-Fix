@@ -8,6 +8,8 @@
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
+// @grant       GM_download
+// @grant       GM_setClipboard
 // @downloadURL  https://github.com/WTPerv/Google-Search-Fix/raw/refs/heads/main/googlesearchfix.user.js
 // ==/UserScript==
 
@@ -201,11 +203,11 @@
 
         const addContainer = document.createElement("div");
         addContainer.id = "gsf_bl_add";
-        addContainerStyle();
+        containerStyle(addContainer);
 
         const addInput = document.createElement("input");
         addInput.id = "gsf_bl_add_input";
-        addInput.placeholder = "Add term";
+        addInput.placeholder = "Add term or terms (separated by comma)";
         addInputStyle();
 
         const addBtn = document.createElement("button");
@@ -221,18 +223,41 @@
         });
 
         addBtn.onclick = () => {
-            const v = addInput.value.trim();
-            if (!v) return;
+            const values = addInput.value;
+            if (!values) return;
 
-            const list = getBlacklist();
-            list.push({ term: v, enabled: true });
-            saveBlacklist(list);
+            const blacklist = getBlacklist();
+
+            const valuesArr = values.split(",");
+            valuesArr.forEach(v => {
+                v = v.trim();
+                let isRepeat = false;
+                for (let i = 0; i < blacklist.length; i++) {
+                    let b = blacklist[i];
+                    if (b.term == v) {
+                        isRepeat = true;
+                        break;
+                    }
+                }
+                if (!isRepeat)
+                    blacklist.push({ term: v, enabled: true });
+            })
+
+            saveBlacklist(blacklist);
 
             addInput.value = "";
             render();
 
             addInput.focus();
         };
+
+        const listContainer = document.createElement("div");
+        listContainer.id = "gsf_bl_list";
+        listContainerStyle();
+
+        const bottomContainer = document.createElement("div");
+        bottomContainer.id = "gsf_bl_extra";
+        containerStyle(bottomContainer);
 
         const allEnableBtn = document.createElement("button");
         allEnableBtn.id = "gsf_bl_extra_allE";
@@ -260,9 +285,23 @@
             render();
         }
 
-        const listContainer = document.createElement("div");
-        listContainer.id = "gsf_bl_list";
-        listContainerStyle();
+        const gap = document.createElement("div");
+        gap.id = "gsf_bl_gap";
+        gap.style.margin = "auto";
+
+        const exportBtn = document.createElement("button");
+        exportBtn.id = "gsf_bl_extra_export";
+        exportBtn.textContent = "Export";
+        btnStyle(exportBtn);
+
+        exportBtn.onclick = () => exportSettingstoFile();
+
+        const exportClipboardBtn = document.createElement("button");
+        exportClipboardBtn.id = "gsf_bl_extra_exportClip";
+        exportClipboardBtn.textContent = "Export to Clipboard";
+        btnStyle(exportClipboardBtn);
+
+        exportClipboardBtn.onclick = () => exportSettingsToClipboard("blacklist");
 
         insertToHTML();
         makeDraggable();
@@ -275,11 +314,15 @@
             header.appendChild(closeBtn);
             addContainer.appendChild(addInput);
             addContainer.appendChild(addBtn);
-            addContainer.appendChild(allEnableBtn);
-            addContainer.appendChild(allDisableBtn);
+            bottomContainer.appendChild(allEnableBtn);
+            bottomContainer.appendChild(allDisableBtn);
+            bottomContainer.appendChild(gap);
+            bottomContainer.appendChild(exportBtn);
+            bottomContainer.appendChild(exportClipboardBtn);
             menu.appendChild(header);
             menu.appendChild(addContainer);
             menu.appendChild(listContainer);
+            menu.appendChild(bottomContainer);
 
             document.body.appendChild(menu);
         }
@@ -384,10 +427,10 @@
             closeBtn.style.cursor = "pointer";
         }
 
-        function addContainerStyle() {
-            addContainer.style.display = "flex";
-            addContainer.style.gap = "6px";
-            addContainer.style.padding = "10px";
+        function containerStyle(container) {
+            container.style.display = "flex";
+            container.style.gap = "6px";
+            container.style.padding = "10px";
         }
 
         function addInputStyle() {
@@ -408,6 +451,7 @@
             btn.style.borderRadius = "20px";
             btn.style.background = "transparent";
             btn.style.color = "white";
+            btn.style.height = "30px";
         }
 
         function listContainerStyle() {
@@ -530,6 +574,46 @@
         }
 
         return newQuery;
+    }
+
+    function getExportData() {
+        let data = "";
+
+        data += "BLACKLIST (just copy everything below and paste it in the Blacklist Settings)\n\n"
+        data += getBlacklistExportData() + "\n\n\n";
+
+        return data;
+    }
+
+    function getBlacklistExportData() {
+        const blacklist = getBlacklist();
+        let data = ""
+
+        blacklist.forEach((b, i) => {
+            data += b.term;
+            if (i < blacklist.length - 1) data += ",";
+        })
+
+        return data;
+    }
+
+    function exportSettingsToClipboard(list) {
+        let data = "";
+        if (list == "blacklist") data = getBlacklistExportData();
+        else return;
+
+        GM_setClipboard(data, "text");
+    }
+
+    function exportSettingstoFile() {
+        const data = getExportData();
+        const txt_file = new File([data], "GoogleSearchFix - Settings.txt", { type: "text/plain" });
+
+        GM_download({
+            url: window.URL.createObjectURL(txt_file),
+            name: txt_file.name,
+            saveAs: true
+        });
     }
 
 })();
