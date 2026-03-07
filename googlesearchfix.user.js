@@ -2,7 +2,7 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      1.1.0
+// @version      1.1.1
 // @description  Custom Google search bar, make every term relevant, custom blacklist
 // @author       WTP
 // @grant       GM_setValue
@@ -55,7 +55,7 @@
 
         const input = document.createElement("input");
         input.id = "gsf_bar_input";
-        input.placeholder = "Fixed Search";
+        input.placeholder = "Search here instead...";
         input.value = getDefaultQuery();
         inputStyle();
 
