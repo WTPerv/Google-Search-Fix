@@ -1,12 +1,25 @@
 # Google-Search-Fix
-GreaseMonkey Script to make Google usable again. Includes a configurable blacklist.
+GreaseMonkey Script to make Google usable again.
+
+<img width="1047" height="167" alt="firefox_S7jLvMAaF1" src="https://github.com/user-attachments/assets/05900b40-e27f-4540-8cd5-b34e2e2b607f" />
 
 ## What does this do?
-Adds a new search bar on top of google's search bar.
+Injects a new search bar on top of google's search bar.\
+Type in this bar as you would as a human.\
+Once you hit enter or click on search it will process it, feed it to Google's own search bar and hit search for you.
 
-Type in this bar as you would as a human.
+## Features
+* **Forced/Relaxed mode**
+  * Forced mode makes **every word** you type be relevant in your results.
+  * Relaxed mode disables this.
+* **Blacklist**
+   * Easily editable list of words for google to avoid in your search.
+   * Every word can be temporarily disabled.
+* **Whitelist**
+   * The opposite of the blacklist.
+   * Every word here will be added to your normal search.
 
-When you click on the search button or press enter, it transforms your search into something ugly looking, but will give you better search results
+Examples below.
 
 ## How to install?
 1. Get a GM Extension:
@@ -17,20 +30,25 @@ When you click on the search button or press enter, it transforms your search in
     * [Install Google Search Fix](https://github.com/WTPerv/Google-Search-Fix/raw/refs/heads/main/googlesearchfix.user.js)
 
 ## Examples
-### Making every term relevant
+### Forced/Relaxed Mode
+Google ever took your search and said *"hm, I think some of these words are optional..."*\
+Enter Forced mode and it'll make **every single word matter** *(by adding quotes around "every" "single" "word")*.
 
 This:
-<img width="1068" height="317" alt="Before fix" src="https://github.com/user-attachments/assets/b09c7659-0f1e-4c06-b3f6-28539070a290" />
+<img width="1050" height="405" alt="firefox_N1SVIawkmY" src="https://github.com/user-attachments/assets/fe4ac1b1-6c65-4368-936b-29fbbd8b470d" />
 
 Becomes this:
-<img width="1427" height="425" alt="After fix" src="https://github.com/user-attachments/assets/9ff06dce-c467-47af-a890-60cd63732daf" />
-
-*(Yes I know the exact phrase wasn't found, but I have full confidence that every result has each and every word included in any other order)*
-
-*(If you actually want the exact phrase, you'd surround the whole phrase with parentheses like "why cant I hold all these lemmings")*
-
-*(More info [here](https://ahrefs.com/blog/google-advanced-search-operators/))*
+<img width="1146" height="420" alt="firefox_yRZ4e0m3Vf" src="https://github.com/user-attachments/assets/95070971-c9d5-475f-ae87-e7986a2d74b9" />
 
 ### Blacklist
-A simple blacklist menu lets you add, remove, enable and disable terms you don't want to find in your results
-<img width="1720" height="529" alt="Look at them blacklists" src="https://github.com/user-attachments/assets/fb3619ee-72b0-4f3e-af8c-5dde05d753af" />
+Ever search for an image and Google was like *"I bet they want an image of this image in a shirt"*\
+Add as many words as you want to the blacklist and never see them again in your results *(unless you click to disable them)*.
+
+<img width="1364" height="783" alt="firefox_nLjrHKYaiY" src="https://github.com/user-attachments/assets/8bd7d299-d564-48bb-ac8a-2e05f1dc927d" />
+
+### Whitelist
+A bit harder to explain this one, but it can be used to store words or operators you frequently need.\
+For instance, I find YouTube's search even worse than Google, so I can just add `site:youtube.com` and browse it from within Google.\
+You could also have something like `before:2017` and relive the old days
+
+<img width="1351" height="599" alt="firefox_r597Ctkwtm" src="https://github.com/user-attachments/assets/c122741a-a3aa-462f-9541-da13c515e36b" />
