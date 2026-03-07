@@ -2,8 +2,8 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      1.0.10
-// @description  Custom Google search bar, make every term obligatory, inject blacklist
+// @version      1.0.11
+// @description  Custom Google search bar, make every term relevant, custom blacklist
 // @author       WTP
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -15,13 +15,13 @@
 
 (function () {
 
+    const STORAGE_FORCED = "gsf_forced";
     const STORAGE_BLACKLIST = "gsf_blacklist";
 
     createCustomBar();
 
     const observer = new MutationObserver(createCustomBar);
     observer.observe(document.body, { childList: true, subtree: true });
-
 
     function createCustomBar() {
 
@@ -69,10 +69,20 @@
             }
         });
 
+        const forcedBtn = document.createElement("button");
+        forcedBtn.id = "gsf_forcedBtn";
+        forcedBtn.textContent = getForcedLabel();
+        btnStyle(forcedBtn);
+
+        forcedBtn.onclick = () => {
+            setForced(!isForced());
+            forcedBtn.textContent = getForcedLabel();
+        }
+
         const blacklistBtn = document.createElement("button");
         blacklistBtn.id = "gsf_blacklistBtn";
         blacklistBtn.textContent = "Blacklist \n Settings";
-        blacklistBtnStyle();
+        btnStyle(blacklistBtn);
 
         blacklistBtn.onclick = () => {
             const modal = createBlacklistMenu();
@@ -98,6 +108,7 @@
             bar.appendChild(input);
             bar.appendChild(searchBtn);
             wrapper.append(bar);
+            wrapper.append(forcedBtn);
             wrapper.appendChild(blacklistBtn);
             container.appendChild(wrapper);
 
@@ -169,14 +180,14 @@
 </svg>`;
         }
 
-        function blacklistBtnStyle() {
-            blacklistBtn.style.background = "transparent";
-            blacklistBtn.style.cursor = "pointer";
-            blacklistBtn.style.border = "solid";
-            blacklistBtn.style.borderWidth = "1px";
-            blacklistBtn.style.borderRadius = "20px";
-            blacklistBtn.style.padding = "0 8px";
-            blacklistBtn.style.margin = "0px";
+        function btnStyle(btn) {
+            btn.style.background = "transparent";
+            btn.style.cursor = "pointer";
+            btn.style.border = "solid";
+            btn.style.borderWidth = "1px";
+            btn.style.borderRadius = "20px";
+            btn.style.padding = "0 8px";
+            btn.style.margin = "0px";
         }
     }
 
@@ -358,9 +369,9 @@
         function render() {
             listContainer.innerHTML = ""; //reset
 
-            const list = getBlacklist();
+            const blacklist = getBlacklist();
 
-            list.forEach((item, index) => {
+            blacklist.forEach((item, index) => {
                 const chip = document.createElement("div");
                 chipStyle(chip, item);
 
@@ -372,14 +383,14 @@
 
                 chipDel.onclick = (e) => {
                     e.stopPropagation();
-                    list.splice(index, 1);
-                    saveBlacklist(list);
+                    blacklist.splice(index, 1);
+                    saveBlacklist(blacklist);
                     render();
                 };
 
                 chip.onclick = () => {
-                    list[index].enabled = !list[index].enabled;
-                    saveBlacklist(list);
+                    blacklist[index].enabled = !blacklist[index].enabled;
+                    saveBlacklist(blacklist);
                     render();
                 };
 
@@ -487,8 +498,20 @@
         }
     }
 
+    function isForced() {
+        return GM_getValue(STORAGE_FORCED, "1") == "1";
+    }
+
+    function setForced(value) {
+        GM_setValue(STORAGE_FORCED, value ? "1" : "0");
+    }
+
+    function getForcedLabel() {
+        return isForced() ? "Forced" : "Relaxed";
+    }
+
     function getBlacklist() {
-        return JSON.parse(GM_getValue(STORAGE_BLACKLIST) || "[]");
+        return JSON.parse(GM_getValue(STORAGE_BLACKLIST, "[]"));
     }
 
     function saveBlacklist(list) {
@@ -501,11 +524,17 @@
     }
 
     function transformQuery(q) {
+        const is_forced = isForced();
+        console.log(is_forced);
+
+
         const googleResStarts = ["before:", "after:", "define:", "cache:", "filetype:", "ext:", "site:", "related:", "intitle:", "allintitle:", "inurl:", "allinurl:", "intext:", "allintext:", "weather:", "stocks:", "map:", "movie:", "source:"];
         const googleResEquals = ["OR", "|", "AND"];
 
         const parts = getQueryParts(q);
         const quoted = parts.map(p => {
+            if (!is_forced) return p;
+
             if (googleResEquals.some(e => p === e)) return p;
 
             const isNegated = p.startsWith('-');
@@ -524,6 +553,8 @@
         const blacklist = getBlacklist()
             .filter(b => b.enabled)
             .map(b => {
+                if (!is_forced && !b.term.includes(" ")) return `-${b.term}`
+
                 const isOperator = googleResStarts.some(s => b.term.startsWith(s));
                 if (isOperator)
                     return `-${b.term}`;
@@ -547,7 +578,7 @@
         for (let i = 0; i < googleQueryParts.length; i++) {
             let p = googleQueryParts[i];
             let isExcluded = p.startsWith('-');
-            let cleaned = p.replace(/^-/, '').replace(/"/g, '');
+            let cleaned = p.replace(/^-/, '').replace(/"/g, ''); //remove -, remove "
 
             query.push({ term: cleaned, anti: isExcluded });
         }
