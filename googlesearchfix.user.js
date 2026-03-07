@@ -2,7 +2,7 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      2026-03-06_2
+// @version      1.0.10
 // @description  Custom Google search bar, make every term obligatory, inject blacklist
 // @author       WTP
 // @grant       GM_setValue
