@@ -2,7 +2,7 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      1.0.11
+// @version      1.1.0
 // @description  Custom Google search bar, make every term relevant, custom blacklist
 // @author       WTP
 // @grant       GM_setValue
@@ -17,6 +17,7 @@
 
     const STORAGE_FORCED = "gsf_forced";
     const STORAGE_BLACKLIST = "gsf_blacklist";
+    const STORAGE_WHITELIST = "gsf_whitelist";
 
     createCustomBar();
 
@@ -81,12 +82,23 @@
 
         const blacklistBtn = document.createElement("button");
         blacklistBtn.id = "gsf_blacklistBtn";
-        blacklistBtn.textContent = "Blacklist \n Settings";
+        blacklistBtn.innerHTML = "Blacklist";
         btnStyle(blacklistBtn);
 
         blacklistBtn.onclick = () => {
-            const modal = createBlacklistMenu();
-            modal.style.display = "flex";
+            createMenu("blacklist", "Blacklist Settings", getBlacklist, saveBlacklist);
+        };
+
+        const whitelistBtn = document.createElement("button");
+        whitelistBtn.id = "gsf_whitelistBtn";
+        whitelistBtn.innerHTML = "Whitelist";
+        btnStyle(whitelistBtn);
+
+        whitelistBtn.onclick = () => {
+            const menu = createMenu("whitelist", "Whitelist Settings", getWhitelist, saveWhitelist);
+            menu.style.borderStyle = "solid";
+            menu.style.borderWidth = "1px";
+            menu.style.borderColor = "white";
         };
 
         insertToHTML();
@@ -110,6 +122,7 @@
             wrapper.append(bar);
             wrapper.append(forcedBtn);
             wrapper.appendChild(blacklistBtn);
+            wrapper.appendChild(whitelistBtn);
             container.appendChild(wrapper);
 
             ogContainer.before(container);
@@ -186,43 +199,47 @@
             btn.style.border = "solid";
             btn.style.borderWidth = "1px";
             btn.style.borderRadius = "20px";
-            btn.style.padding = "0 8px";
+            btn.style.padding = "0 10px";
             btn.style.margin = "0px";
         }
     }
 
-    function createBlacklistMenu() {
-
-        if (document.getElementById("gsf_bl_menu")) return;
+    function createMenu(id, menuTitle, getData, saveData) {
+        const prevMenu = document.getElementById("gsf_menu");
+        if (prevMenu) {
+            if (prevMenu.name == id) return;
+            else prevMenu.remove();
+        }
 
         let dragging = false;
         let drag_offsetX = 0;
         let drag_offsetY = 0;
 
         const menu = document.createElement("div");
-        menu.id = "gsf_bl_menu";
+        menu.id = "gsf_menu";
+        menu.name = id;
         menuStyle();
 
         const header = document.createElement("div");
-        header.id = "gsf_bl_header";
+        header.id = "gsf_menu_header";
         headerStyle();
 
         const closeBtn = document.createElement("button");
-        closeBtn.id = "gsf_bl_closeBtn";
+        closeBtn.id = "gsf_menu_closeBtn";
         closeBtnStyle();
         closeBtn.onclick = () => menu.remove();
 
         const addContainer = document.createElement("div");
-        addContainer.id = "gsf_bl_add";
+        addContainer.id = "gsf_menu_add";
         containerStyle(addContainer);
 
         const addInput = document.createElement("input");
-        addInput.id = "gsf_bl_add_input";
+        addInput.id = "gsf_menu_add_input";
         addInput.placeholder = "Add term or terms (separated by comma)";
         addInputStyle();
 
         const addBtn = document.createElement("button");
-        addBtn.id = "gsf_bl_add_btn";
+        addBtn.id = "gsf_menu_add_btn";
         addBtn.textContent = "+";
         btnStyle(addBtn);
 
@@ -237,24 +254,24 @@
             const values = addInput.value;
             if (!values) return;
 
-            const blacklist = getBlacklist();
+            const data = getData();
 
             const valuesArr = values.split(",");
             valuesArr.forEach(v => {
                 v = v.trim();
                 let isRepeat = false;
-                for (let i = 0; i < blacklist.length; i++) {
-                    let b = blacklist[i];
+                for (let i = 0; i < data.length; i++) {
+                    let b = data[i];
                     if (b.term == v) {
                         isRepeat = true;
                         break;
                     }
                 }
                 if (!isRepeat)
-                    blacklist.push({ term: v, enabled: true });
+                    data.push({ term: v, enabled: true });
             })
 
-            saveBlacklist(blacklist);
+            saveData(data);
 
             addInput.value = "";
             render();
@@ -263,56 +280,56 @@
         };
 
         const listContainer = document.createElement("div");
-        listContainer.id = "gsf_bl_list";
+        listContainer.id = "gsf_menu_list";
         listContainerStyle();
 
         const bottomContainer = document.createElement("div");
-        bottomContainer.id = "gsf_bl_extra";
+        bottomContainer.id = "gsf_menu_extra";
         containerStyle(bottomContainer);
 
         const allEnableBtn = document.createElement("button");
-        allEnableBtn.id = "gsf_bl_extra_allE";
+        allEnableBtn.id = "gsf_menu_extra_allE";
         allEnableBtn.textContent = "Enable All";
         btnStyle(allEnableBtn);
 
         allEnableBtn.onclick = () => {
-            const list = getBlacklist();
+            const data = getData();
 
-            list.forEach(item => { item.enabled = true; });
-            saveBlacklist(list);
+            data.forEach(item => { item.enabled = true; });
+            saveData(data);
             render();
         }
 
         const allDisableBtn = document.createElement("button");
-        allDisableBtn.id = "gsf_bl_extra_allD";
+        allDisableBtn.id = "gsf_menu_extra_allD";
         allDisableBtn.textContent = "Disable All";
         btnStyle(allDisableBtn);
 
         allDisableBtn.onclick = () => {
-            const list = getBlacklist();
+            const data = getData();
 
-            list.forEach(item => { item.enabled = false; });
-            saveBlacklist(list);
+            data.forEach(item => { item.enabled = false; });
+            saveData(data);
             render();
         }
 
         const gap = document.createElement("div");
-        gap.id = "gsf_bl_gap";
+        gap.id = "gsf_menu_gap";
         gap.style.margin = "auto";
 
         const exportBtn = document.createElement("button");
-        exportBtn.id = "gsf_bl_extra_export";
+        exportBtn.id = "gsf_menu_extra_export";
         exportBtn.textContent = "Export";
         btnStyle(exportBtn);
 
         exportBtn.onclick = () => exportSettingstoFile();
 
         const exportClipboardBtn = document.createElement("button");
-        exportClipboardBtn.id = "gsf_bl_extra_exportClip";
+        exportClipboardBtn.id = "gsf_menu_extra_exportClip";
         exportClipboardBtn.textContent = "Export to Clipboard";
         btnStyle(exportClipboardBtn);
 
-        exportClipboardBtn.onclick = () => exportSettingsToClipboard("blacklist");
+        exportClipboardBtn.onclick = () => exportSettingsToClipboard(getData);
 
         insertToHTML();
         makeDraggable();
@@ -369,9 +386,9 @@
         function render() {
             listContainer.innerHTML = ""; //reset
 
-            const blacklist = getBlacklist();
+            const data = getData();
 
-            blacklist.forEach((item, index) => {
+            data.forEach((item, index) => {
                 const chip = document.createElement("div");
                 chipStyle(chip, item);
 
@@ -383,14 +400,14 @@
 
                 chipDel.onclick = (e) => {
                     e.stopPropagation();
-                    blacklist.splice(index, 1);
-                    saveBlacklist(blacklist);
+                    data.splice(index, 1);
+                    saveData(data);
                     render();
                 };
 
                 chip.onclick = () => {
-                    blacklist[index].enabled = !blacklist[index].enabled;
-                    saveBlacklist(blacklist);
+                    data[index].enabled = !data[index].enabled;
+                    saveData(data);
                     render();
                 };
 
@@ -403,6 +420,7 @@
         //##### STYLE #####
 
         function menuStyle() {
+            menu.style.display = "flex";
             menu.style.position = "fixed";
             menu.style.top = "50%";
             menu.style.left = "50%";
@@ -414,7 +432,6 @@
             menu.style.borderRadius = "8px";
             menu.style.boxShadow = "0 0 20px rgba(0,0,0,.6)";
             menu.style.zIndex = "999999";
-            menu.style.display = "none";
             menu.style.flexDirection = "column";
             menu.style.overflow = "hidden";
             menu.style.resize = "both";
@@ -426,7 +443,7 @@
             header.style.justifyContent = "space-between";
             header.style.padding = "10px 14px";
             header.style.fontWeight = "bold";
-            header.textContent = "Blacklist Settings";
+            header.textContent = menuTitle;
             header.style.userSelect = "none";
         }
 
@@ -518,6 +535,14 @@
         GM_setValue(STORAGE_BLACKLIST, JSON.stringify(list));
     }
 
+    function getWhitelist() {
+        return JSON.parse(GM_getValue(STORAGE_WHITELIST, "[]"));
+    }
+
+    function saveWhitelist(list) {
+        GM_setValue(STORAGE_WHITELIST, JSON.stringify(list));
+    }
+
     function getQueryParts(q) {
         const parts = q.match(/-?"[^"]+"|\S+/g) || [];
         return parts;
@@ -525,12 +550,11 @@
 
     function transformQuery(q) {
         const is_forced = isForced();
-        console.log(is_forced);
-
 
         const googleResStarts = ["before:", "after:", "define:", "cache:", "filetype:", "ext:", "site:", "related:", "intitle:", "allintitle:", "inurl:", "allinurl:", "intext:", "allintext:", "weather:", "stocks:", "map:", "movie:", "source:"];
         const googleResEquals = ["OR", "|", "AND"];
 
+        // YOUR QUERY
         const parts = getQueryParts(q);
         const quoted = parts.map(p => {
             if (!is_forced) return p;
@@ -550,10 +574,25 @@
             return p.startsWith('"') ? p : `"${p}"`;
         }).join(" ");
 
+        //WHITELIST
+        const whitelist = getWhitelist()
+            .filter(w => w.enabled)
+            .map(w => {
+                if (!is_forced && !w.term.includes(" ")) return w.term;
+
+                const isOperator = googleResStarts.some(s => w.term.startsWith(s));
+                if (isOperator)
+                    return w.term;
+
+                return `"${w.term}"`;
+            })
+            .join(" ");
+
+        //BLACKLIST
         const blacklist = getBlacklist()
             .filter(b => b.enabled)
             .map(b => {
-                if (!is_forced && !b.term.includes(" ")) return `-${b.term}`
+                if (!is_forced && !b.term.includes(" ")) return `-${b.term}`;
 
                 const isOperator = googleResStarts.some(s => b.term.startsWith(s));
                 if (isOperator)
@@ -563,7 +602,7 @@
             })
             .join(" ");
 
-        return quoted + (blacklist ? " " + blacklist : "");
+        return quoted + (whitelist ? " " + whitelist : "") + (blacklist ? " " + blacklist : "");
     }
 
     function getDefaultQuery() {
@@ -571,10 +610,12 @@
         const googleQuery = googleParams.get("q") || "";
         const googleQueryParts = getQueryParts(googleQuery)
 
+        const whitelist = getWhitelist();
         const blacklist = getBlacklist();
 
         const query = [];
 
+        //organize google query
         for (let i = 0; i < googleQueryParts.length; i++) {
             let p = googleQueryParts[i];
             let isExcluded = p.startsWith('-');
@@ -583,19 +624,31 @@
             query.push({ term: cleaned, anti: isExcluded });
         }
 
+        //filter out blacklist and whitelist
         for (let i = 0; i < query.length; i++) {
             let p = query[i];
-            if (!p.anti) continue;
-            for (let j = 0; j < blacklist.length; j++) {
-                let b = blacklist[j];
-                if (b.enabled && b.term == p.term) {
-                    query.splice(i, 1);
-                    i--;
-                    break;
+            if (p.anti) {
+                for (let j = 0; j < blacklist.length; j++) {
+                    let b = blacklist[j];
+                    if (b.enabled && b.term == p.term) {
+                        query.splice(i, 1);
+                        i--;
+                        break;
+                    }
+                }
+            } else {
+                for (let j = 0; j < whitelist.length; j++) {
+                    let w = whitelist[j];
+                    if (w.enabled && w.term == p.term) {
+                        query.splice(i, 1);
+                        i--;
+                        break;
+                    }
                 }
             }
         }
 
+        //rebuild cute query
         let newQuery = "";
         for (let i = 0; i < query.length; i++) {
             let p = query[i];
@@ -608,31 +661,32 @@
     }
 
     function getExportData() {
-        let data = "";
+        let data = "GOOGLE SEARCH FIX - SETTINGS\n";
+        data += "Paste into the Blacklist or Whitelist windows respectively. Duplicates are ignored.\n\n\n"
 
-        data += "BLACKLIST (just copy everything below and paste it in the Blacklist Settings)\n\n"
-        data += getBlacklistExportData() + "\n\n\n";
+        data += "### BLACKLIST ###\n"
+        data += getListExportData(getBlacklist) + "\n\n";
+
+        data += "### WHITELIST ###\n";
+        data += getListExportData(getWhitelist);
 
         return data;
     }
 
-    function getBlacklistExportData() {
-        const blacklist = getBlacklist();
+    function getListExportData(getData) {
+        const list = getData();
         let data = ""
 
-        blacklist.forEach((b, i) => {
-            data += b.term;
-            if (i < blacklist.length - 1) data += ",";
+        list.forEach((p, i) => {
+            data += p.term;
+            if (i < list.length - 1) data += ",";
         })
 
         return data;
     }
 
-    function exportSettingsToClipboard(list) {
-        let data = "";
-        if (list == "blacklist") data = getBlacklistExportData();
-        else return;
-
+    function exportSettingsToClipboard(getData) {
+        const data = getListExportData(getData);
         GM_setClipboard(data, "text");
     }
 
