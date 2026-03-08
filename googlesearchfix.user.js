@@ -2,7 +2,7 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      1.1.1
+// @version      1.1.2
 // @description  Custom Google search bar, make every term relevant, custom blacklist
 // @author       WTP
 // @grant       GM_setValue
@@ -39,6 +39,8 @@
             ogContainer = form.parentElement; //else, find homepage's container
         }
         if (!ogContainer) return;
+
+        const backgroundColor = window.getComputedStyle(document.body).backgroundColor;
 
         //creating HTML
         const container = document.createElement("div");
@@ -143,7 +145,6 @@
         //##### STYLE #####
 
         function containerStyle() {
-            const backgroundColor = window.getComputedStyle(document.body).backgroundColor;
             container.style.width = "100%";
             container.style.margin = "0px";
             container.style.padding = isHomepage ? "20px 20px 10px 20px" : "10px 10%";
@@ -151,6 +152,8 @@
             container.style.display = "flex";
             container.style.justifyContent = isHomepage ? "center" : "left";
             container.style.alignItems = "center";
+            container.style.zIndex = "999";
+            container.style.position = "relative";
         }
 
         function wrapperStyle() {
@@ -172,6 +175,7 @@
             bar.style.padding = "0px 16px";
             bar.style.outline = "none";
             bar.style.gap = "6px";
+            bar.style.background = backgroundColor;
         }
 
         function inputStyle() {
@@ -194,7 +198,7 @@
         }
 
         function btnStyle(btn) {
-            btn.style.background = "transparent";
+            btn.style.background = backgroundColor;
             btn.style.cursor = "pointer";
             btn.style.border = "solid";
             btn.style.borderWidth = "1px";
