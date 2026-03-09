@@ -2,7 +2,7 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      1.1.2
+// @version      1.1.3
 // @description  Custom Google search bar, make every term relevant, custom blacklist
 // @author       WTP
 // @grant       GM_setValue
@@ -145,7 +145,7 @@
         //##### STYLE #####
 
         function containerStyle() {
-            container.style.width = "100%";
+            container.style.maxWidth = "100%";
             container.style.margin = "0px";
             container.style.padding = isHomepage ? "20px 20px 10px 20px" : "10px 10%";
             container.style.background = backgroundColor;
