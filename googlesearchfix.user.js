@@ -2,7 +2,7 @@
 // @name         Google Search Fix
 // @match        https://www.google.com/*
 // @run-at       document-end
-// @version      1.1.3
+// @version      1.1.4
 // @description  Custom Google search bar, make every term relevant, custom blacklist
 // @author       WTP
 // @grant       GM_setValue
