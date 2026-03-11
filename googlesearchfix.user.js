@@ -614,6 +614,7 @@
         const googleQuery = googleParams.get("q") || "";
         const googleQueryParts = getQueryParts(googleQuery)
 
+        const is_forced = isForced();
         const whitelist = getWhitelist();
         const blacklist = getBlacklist();
 
@@ -623,7 +624,8 @@
         for (let i = 0; i < googleQueryParts.length; i++) {
             let p = googleQueryParts[i];
             let isExcluded = p.startsWith('-');
-            let cleaned = p.replace(/^-/, '').replace(/"/g, ''); //remove -, remove "
+            let cleaned = p.replace(/^-/, ''); //remove -
+            if (is_forced) cleaned = cleaned.replace(/"/g, ''); //remove "
 
             query.push({ term: cleaned, anti: isExcluded });
         }
@@ -657,7 +659,7 @@
         for (let i = 0; i < query.length; i++) {
             let p = query[i];
             if (p.anti) newQuery += "-";
-            newQuery += p.term.includes(" ") ? `"${p.term}"` : p.term;
+            newQuery += (is_forced && p.term.includes(" ")) ? `"${p.term}"` : p.term;
             if (i < query.length - 1) newQuery += " ";
         }
 
